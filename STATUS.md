@@ -6,9 +6,9 @@
 
 ---
 
-## Current State: Feature-complete for v0.15.0, quality gate green, pending initial commit
+## Current State: Feature-complete for v0.15.0, quality gate green, initial commit created
 
-All planned v0.15.0 features are implemented. The full quality gate has been confirmed green on 2026-08-15: ruff lint passed, typecheck passed (extension + contracts), 113 tests passed (73 Python pytest + 33 extension Vitest + 7 contracts Vitest), and both builds passed (vite extension + tsc contracts). No git commits exist yet — the initial commit remains the single blocking item before a load-unpacked beta round.
+All planned v0.15.0 features are implemented. The full quality gate has been confirmed green on 2026-08-15: ruff lint passed, typecheck passed (extension + contracts), 113 tests passed (73 Python pytest + 33 extension Vitest + 7 contracts Vitest), and both builds passed (vite extension + tsc contracts). The initial commit (`73df69e`) is created; the working tree is clean. Remaining before a load-unpacked beta round: configure `SUPADATA_API_KEY` (optional transcript fallback) and run a credentialed smoke test.
 
 Known gap: the extension ships no icons — `apps/extension/public/` contains only `manifest.json` (no `icons` field). Fine for load-unpacked; required before Chrome Web Store submission.
 
@@ -26,7 +26,7 @@ Known gap: the extension ships no icons — `apps/extension/public/` contains on
 | Tests | ✅ Passing | 113 tests green (73 pytest + 33 extension Vitest + 7 contracts Vitest) |
 | Build | ✅ Passing | vite (extension) + tsc (contracts) both succeed |
 | Quality gate | ✅ Green | ruff lint + typecheck + tests + build, confirmed 2026-08-15 |
-| Git history | ❌ Missing | No commits; all files untracked |
+| Git history | ✅ Created | Initial commit `73df69e`; clean tree |
 
 ---
 
@@ -46,6 +46,6 @@ Known gap: the extension ships no icons — `apps/extension/public/` contains on
 ## Immediate Action
 
 1. ~~Run `pnpm check` and confirm all passes~~ ✅ DONE 2026-08-15 — full gate green (see Component Status)
-2. Create initial git commit (only remaining blocking item)
+2. ~~Create initial git commit~~ ✅ DONE 2026-08-15 — `73df69e`
 3. Configure `SUPADATA_API_KEY` in `.env` when the key is available (adds transcript fallback against YouTube po-token anti-bot)
 4. See `HANDOFF.md` for full detail

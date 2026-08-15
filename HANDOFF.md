@@ -143,7 +143,7 @@ The following items were resolved during the Claude Code handoff (see footer for
 
 | Item | Status |
 |---|---|
-| **Git initial commit** | No commits exist. All code is untracked. |
+| **Git initial commit** | ✅ DONE (2026-08-15) — `73df69e`, clean tree |
 | **`pnpm check` full suite** | ✅ GREEN (2026-08-15) — lint + typecheck + 113 tests + build all pass |
 | **Real credentialed LiveKit smoke test** | Open across all beta rounds; requires LiveKit Cloud project + Cartesia credentials |
 | **Three-video semantic content retest (B1-01, B2-01, B3-01)** | Open; human review required |
@@ -251,12 +251,7 @@ Most recently modified (in order, today 2026-08-14):
 
 1. ~~**Run `pnpm check`** to confirm lint, typecheck, tests, and build all pass.~~ ✅ DONE 2026-08-15 — gate green (see "Claude Code Resolution" above).
 
-2. **Create the initial git commit** (the single remaining blocking item):
-   ```bash
-   cd /Users/mjmj/Documents/ChatGPT/echo
-   git add -A
-   git commit -m "feat: EchoScene v0.15.0 — full transcript workspace, server-side prep jobs, streaming voice feedback, session snapshots"
-   ```
+2. ~~**Create the initial git commit** (the single remaining blocking item)~~ ✅ DONE 2026-08-15 — commit `73df69e`, message "feat: EchoScene v0.15.0 — full transcript workspace, server-side prep jobs, streaming voice feedback, session snapshots".
 
 3. **Configure `SUPADATA_API_KEY` in `.env`** once the user's key arrives (adds a transcript fallback that mitigates the intermittent YouTube po-token anti-bot).
 
