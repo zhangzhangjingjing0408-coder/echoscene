@@ -1,0 +1,30 @@
+{
+  "name": "@echoscene/extension",
+  "version": "0.15.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "package": "pnpm build && bash scripts/package-extension.sh"
+  },
+  "dependencies": {
+    "@echoscene/contracts": "workspace:*",
+    "@fontsource/manrope": "^5.2.6",
+    "@fontsource/newsreader": "^5.2.8",
+    "livekit-client": "^2.15.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.6.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.1.0",
+    "vitest": "^3.2.0"
+  }
+}

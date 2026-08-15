@@ -1,0 +1,16 @@
+{
+  "name": "echoscene",
+  "version": "0.15.0",
+  "private": true,
+  "packageManager": "pnpm@11.16.0",
+  "scripts": {
+    "build": "pnpm -r --if-present build",
+    "dev:extension": "pnpm --filter @echoscene/extension dev",
+    "lint": ".venv/bin/python -m ruff check .",
+    "test": "pnpm -r --if-present test && pnpm test:python",
+    "test:python": ".venv/bin/python -m pytest",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "package:extension": "pnpm --filter @echoscene/extension package"
+  }
+}

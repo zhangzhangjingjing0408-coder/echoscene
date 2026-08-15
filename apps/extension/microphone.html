@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-Hans" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>EchoScene · 麦克风授权</title>
+  </head>
+  <body>
+    <main class="permission-shell">
+      <p class="eyebrow">EchoScene · Voice setup</p>
+      <h1>允许麦克风后，才能听见并反馈你的回答。</h1>
+      <p class="explanation">
+        点击下面的按钮后，Chrome 应显示麦克风授权提示。EchoScene 只做一次短暂设备测试，
+        随即停止测试音轨；原始麦克风音频默认不保存。
+      </p>
+      <button id="request-microphone" type="button">允许 EchoScene 使用麦克风</button>
+      <p id="permission-status" class="status" role="status" aria-live="polite">
+        等待你的操作。
+      </p>
+      <section id="system-help" class="system-help" hidden>
+        <h2>如果 Chrome 没有弹出授权框</h2>
+        <ol>
+          <li>打开 macOS「系统设置」。</li>
+          <li>进入「隐私与安全性 → 麦克风」。</li>
+          <li>打开「Google Chrome」，然后完全退出并重新打开 Chrome。</li>
+        </ol>
+      </section>
+      <p class="return-note">授权成功后，关闭此标签页，回到 YouTube 旁的 EchoScene 再点一次语音练习。</p>
+    </main>
+    <script type="module" src="/src/microphone/index.ts"></script>
+  </body>
+</html>
