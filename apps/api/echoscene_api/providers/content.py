@@ -122,36 +122,107 @@ def _validation_detail(error: ValidationError) -> str:
     return f"Schema field {location} failed: {error_type}"
 
 
+def _clamp_evidence_ids(value: object, limit: int) -> object:
+    """Dedupe a segment-ID list and clamp it to the contract's max length.
+
+    The model occasionally repeats a segment ID while enumerating evidence; that noise
+    alone can push a field past its ``max_length`` and abort the whole preparation.
+    Dedupe string IDs first, then clamp, so one noisy enumeration does not fail the
+    request. Non-string items are preserved so Pydantic still reports a real type error.
+    """
+    if not isinstance(value, list):
+        return value
+    unique: list[object] = []
+    seen: set[str] = set()
+    for item in value:
+        if isinstance(item, str):
+            if item in seen:
+                continue
+            seen.add(item)
+        unique.append(item)
+    return unique[:limit]
+
+
 def _normalize_semantic_payload(payload: dict[str, object]) -> dict[str, object]:
-    """Normalize only lossless, documented task-kind aliases before strict validation."""
-    tasks = payload.get("tasks")
-    if not isinstance(tasks, list):
-        return payload
-    kind_aliases = {
-        "summary": "retell",
-        "summarize": "retell",
-        "retelling": "retell",
-        "apply": "explain",
-        "application": "explain",
-        "compare": "explain",
-        "comparison": "explain",
-        "analysis": "explain",
-        "evaluate": "opinion",
-        "evaluation": "opinion",
-        "discuss": "opinion",
-        "critique": "opinion",
-    }
-    normalized_tasks: list[object] = []
-    for task in tasks:
-        if not isinstance(task, dict):
-            normalized_tasks.append(task)
-            continue
-        normalized = dict(task)
-        raw_kind = normalized.get("kind")
-        if isinstance(raw_kind, str):
-            normalized["kind"] = kind_aliases.get(raw_kind.strip().lower(), raw_kind)
-        normalized_tasks.append(normalized)
-    return {**payload, "tasks": normalized_tasks}
+    """Normalize lossless aliases and clamp noisy evidence lists before strict validation."""
+    normalized = dict(payload)
+
+    # Clamp evidence lists to the contract limits (mirroring semantic_contracts.py), deduping
+    # repeated IDs first so a noisy enumeration does not breach max_length. The payload uses the
+    # JSON Schema's camelCase aliases, so these keys match the model's wire format.
+    normalized["videoThesisEvidenceSegmentIds"] = _clamp_evidence_ids(
+        normalized.get("videoThesisEvidenceSegmentIds"), 20
+    )
+
+    argument_structure = normalized.get("argumentStructure")
+    if isinstance(argument_structure, list):
+        normalized["argumentStructure"] = [
+            (
+                {
+                    **step,
+                    "evidenceSegmentIds": _clamp_evidence_ids(
+                        step.get("evidenceSegmentIds"), 12
+                    ),
+                }
+                if isinstance(step, dict)
+                else step
+            )
+            for step in argument_structure
+        ]
+
+    knowledge_units = normalized.get("knowledgeUnits")
+    if isinstance(knowledge_units, list):
+        normalized["knowledgeUnits"] = [
+            (
+                {
+                    **unit,
+                    "evidenceSegmentIds": _clamp_evidence_ids(
+                        unit.get("evidenceSegmentIds"), 12
+                    ),
+                }
+                if isinstance(unit, dict)
+                else unit
+            )
+            for unit in knowledge_units
+        ]
+
+    tasks = normalized.get("tasks")
+    if isinstance(tasks, list):
+        kind_aliases = {
+            "summary": "retell",
+            "summarize": "retell",
+            "retelling": "retell",
+            "apply": "explain",
+            "application": "explain",
+            "compare": "explain",
+            "comparison": "explain",
+            "analysis": "explain",
+            "evaluate": "opinion",
+            "evaluation": "opinion",
+            "discuss": "opinion",
+            "critique": "opinion",
+        }
+        normalized_tasks: list[object] = []
+        for task in tasks:
+            if not isinstance(task, dict):
+                normalized_tasks.append(task)
+                continue
+            normalized_task = dict(task)
+            raw_kind = normalized_task.get("kind")
+            if isinstance(raw_kind, str):
+                normalized_task["kind"] = kind_aliases.get(raw_kind.strip().lower(), raw_kind)
+            reference_answer = normalized_task.get("referenceAnswer")
+            if isinstance(reference_answer, dict):
+                normalized_task["referenceAnswer"] = {
+                    **reference_answer,
+                    "evidenceSegmentIds": _clamp_evidence_ids(
+                        reference_answer.get("evidenceSegmentIds"), 12
+                    ),
+                }
+            normalized_tasks.append(normalized_task)
+        normalized["tasks"] = normalized_tasks
+
+    return normalized
 
 
 def _evidence_reference(

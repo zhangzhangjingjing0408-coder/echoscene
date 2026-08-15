@@ -354,3 +354,74 @@ async def test_deepseek_provider_orders_selected_units_and_evidence_by_source_ti
         reference.start_seconds
         for reference in result.summary.knowledge_units[0].evidence
     ] == [0, 240]
+
+
+def test_evidence_lists_are_deduped_and_clamped() -> None:
+    payload = {
+        "videoThesisEvidenceSegmentIds": [f"video:{i:04d}" for i in range(1, 26)],
+        "argumentStructure": [
+            {"step": "A", "evidenceSegmentIds": ["video:0001"] * 30},
+        ],
+        "knowledgeUnits": [
+            {
+                "id": "unit-1",
+                "title": "Title",
+                "summary": "Summary",
+                "importanceReason": "Reason",
+                "keywords": ["key"],
+                "evidenceSegmentIds": ["video:0002"] * 15,
+                "confidence": 0.9,
+            }
+        ],
+        "tasks": [
+            {
+                "id": "task-1",
+                "kind": "retell",
+                "prompt": "Prompt",
+                "coachingFocus": "Focus",
+                "knowledgeUnitIds": ["unit-1"],
+                "referenceAnswer": {
+                    "answer": "Answer",
+                    "requiredIdeas": ["idea"],
+                    "acceptableAlternatives": [],
+                    "claimsToAvoid": [],
+                    "evidenceSegmentIds": ["video:0003"] * 20,
+                },
+                "rubric": [
+                    {"dimension": "a", "successDescription": "A"},
+                    {"dimension": "b", "successDescription": "B"},
+                ],
+                "usefulVocabulary": [],
+            }
+        ],
+    }
+    normalized = _normalize_semantic_payload(payload)
+
+    assert normalized["videoThesisEvidenceSegmentIds"] == [
+        f"video:{i:04d}" for i in range(1, 21)
+    ]
+    assert normalized["argumentStructure"][0]["evidenceSegmentIds"] == ["video:0001"]
+    assert normalized["knowledgeUnits"][0]["evidenceSegmentIds"] == ["video:0002"]
+    assert normalized["tasks"][0]["referenceAnswer"]["evidenceSegmentIds"] == [
+        "video:0003"
+    ]
+
+
+@pytest.mark.asyncio
+async def test_deepseek_provider_tolerates_repeated_argument_evidence() -> None:
+    payload = semantic_payload()
+    argument_structure = payload["argumentStructure"]
+    assert isinstance(argument_structure, list)
+    argument_structure[1]["evidenceSegmentIds"] = ["video:0002"] * 13
+    provider = DeepSeekSemanticContentProvider(
+        api_key="test-secret",
+        max_retries=0,
+        transport=httpx.MockTransport(lambda request: deepseek_response(payload)),
+    )
+    result = await provider.prepare(
+        video_id="video",
+        title="How attention works",
+        guidance_language="en",
+        segments=transcript(),
+    )
+    assert result.summary.argument_structure[1].startswith("Show how")
