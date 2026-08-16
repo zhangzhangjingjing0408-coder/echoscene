@@ -7,6 +7,54 @@ captions, can use DeepSeek for grounded semantic content, and contains the real 
 token, and Agent boundaries. Live voice remains credential-gated and is never simulated when those
 credentials are absent.
 
+## 快速开始（交给你的编程 Agent）
+
+EchoScene 是「自带 API Key」的开源模型：没有官方服务器，所有能力都在你自己的电脑上跑。
+你只需要准备好 3 个 key，然后把下面这段话原样发给你的编程 Agent（Claude Code、Codex、
+Cursor 等），它会帮你克隆、安装、构建插件并启动常驻服务。
+
+> 把这整段发给你的 Agent：
+
+```text
+请帮我在本机安装并启动 EchoScene（一个把 YouTube 视频变成实时口语练习的 Chrome 插件）。
+
+1. 克隆仓库到本地，进入项目目录。
+2. 运行 ./scripts/install.sh（脚本会自动安装 uv 和 pnpm、创建隔离的 Python 3.12 虚拟环境、
+   安装后端依赖、构建 Chrome 插件，并在 macOS 上注册两个常驻服务）。
+3. 装完后确认 .env 已从 .env.example 生成（脚本会自动做，别覆盖我已有的 .env）。
+4. 用 curl http://127.0.0.1:8787/health 确认 API 已启动，返回 status: ok 即成功。
+
+只负责安装和启动，不要改动任何功能代码。
+```
+
+### 三个需要你填的 key
+
+安装脚本不会替你填任何 key。装完后打开项目根目录的 `.env`，填入下表里的值：
+
+| 能力 | 去哪里拿 | 填到 `.env` 的哪个字段 | 不填会怎样 |
+| --- | --- | --- | --- |
+| 字幕兜底 | [supadata.ai](https://supadata.ai) 注册，Dashboard 复制 API Key | `SUPADATA_API_KEY` | 仍可用 YouTube 自带字幕；偶发反爬失败时无兜底 |
+| 深度练习内容 | [platform.deepseek.com](https://platform.deepseek.com) 注册充值，API Keys 新建 | `DEEPSEEK_API_KEY` | 降级为抽取式时间线（无语义总结/知识单元/任务） |
+| 语音教练 | [cloud.livekit.io](https://cloud.livekit.io) 新建免费项目，Settings → Keys | `LIVEKIT_URL`、`LIVEKIT_API_KEY`、`LIVEKIT_API_SECRET` | 无法开启语音对话练习 |
+
+LiveKit 免费套餐包含每月 1000 分钟 Agent 会话，语音教练走 LiveKit 内置推理
+（Deepgram 转写 + Gemini 对话 + Cartesia 语音合成），不需要再单独申请这些语音 key。
+
+> 不填 LiveKit 三件套也没关系：此时语音教练 Worker 会启动失败并反复重试（日志里持续出现
+> `LIVEKIT_URL` 报错），这是预期行为，不影响字幕和深度练习。填好三件套后 Worker 会自动恢复，
+> 无需手动干预。
+
+> 成本提示：深度练习每次会调用 DeepSeek 生成结构化内容。`deepseek-v4-pro` 能力更强但较贵；
+> 想省成本可把 `.env` 里的 `ECHOSCENE_CONTENT_MODEL` 改成 `deepseek-v4-flash`（价格约为 pro 的
+> 1/3，日常口语练习足够）。
+
+### 装好之后
+
+1. 打开 `chrome://extensions`，开启右上角 **开发者模式**。
+2. 点 **加载已解压的扩展程序**，选择 `apps/extension/dist`。
+3. 打开任意一个 YouTube 视频页，刷新一次，点击视频标题旁的 **Practice with EchoScene**。
+4. 首次使用会先准备字幕和深度内容，准备好后即可开始口语练习。
+
 ## What works in the skeleton
 
 - Chrome Side Panel that follows the current YouTube light or dark theme
@@ -49,14 +97,20 @@ AGENTS.md              repository-wide engineering instructions
 .impeccable.md         persistent design context
 ```
 
-## Prerequisites
+## 开发者参考
+
+> 以下内容是给 EchoScene 的开发者/贡献者本地开发用的。**新用户请使用上面的「快速开始」**，
+> `./scripts/install.sh` 已经自动完成了下面的安装、构建和启动。不要手动运行
+> `pip install -e '.[dev]'` —— 该命令不会安装语音教练所需的 LiveKit 依赖，会导致语音对话练习不可用。
+
+### Prerequisites
 
 - Node.js 22+
 - pnpm 11+
 - Python 3.11+
 - Google Chrome 116+
 
-## Install
+### Install
 
 ```bash
 pnpm install
@@ -73,7 +127,7 @@ Real LiveKit providers are optional and intentionally not installed by the base 
 
 Copy `.env.example` to `.env` only when you are ready to configure services. Never place real keys in source files, screenshots, chat messages, or traces.
 
-## Build and install the extension
+### Build and install the extension
 
 ```bash
 pnpm build
@@ -97,7 +151,7 @@ pnpm package:extension
 
 Output: `apps/extension/echoscene-extension-<version>.zip`.
 
-## Run the Side Panel as a web preview
+### Run the Side Panel as a web preview
 
 ```bash
 pnpm dev:extension
@@ -105,7 +159,7 @@ pnpm dev:extension
 
 Open `http://127.0.0.1:5173/sidepanel.html` for the light preview or append `?theme=dark` for the dark preview. The web preview uses explicit fallback video metadata because Chrome extension APIs are unavailable outside the extension.
 
-## Run the API
+### Run the API
 
 ```bash
 .venv/bin/python -m uvicorn echoscene_api.main:app --reload --host 127.0.0.1 --port 8787
@@ -129,7 +183,7 @@ If you keep settings in `.env`, start with:
 .venv/bin/python -m uvicorn echoscene_api.main:app --reload --env-file .env --host 127.0.0.1 --port 8787
 ```
 
-## Agent boundary
+### Agent boundary
 
 The first LiveKit Worker uses provisional harness candidates through LiveKit Inference:
 Deepgram Nova-3 multilingual, Gemini 2.5 Flash Lite, and Cartesia Sonic 3.5. They remain replaceable
@@ -173,7 +227,7 @@ Run the deterministic replay:
 
 The expected path includes preparation, briefing, prompting, listening, assessment, targeted retry, feedback, and completion. Illegal transitions fail closed.
 
-## Quality checks
+### Quality checks
 
 ```bash
 pnpm check
@@ -188,6 +242,6 @@ The content and voice quality gates are documented in
 [Harness Engineering](docs/harness-engineering.md). DeepSeek output must pass the same evidence,
 schema, semantic, and human-review Harness; configuration alone does not establish quality.
 
-## Confirmed boundaries
+### Confirmed boundaries
 
 See [product decisions](docs/product-decisions.md) for version-one targets, transcript fallback policy, data retention, provider candidates, and deferred decisions. See [AGENTS.md](AGENTS.md) for rules all coding agents must follow.

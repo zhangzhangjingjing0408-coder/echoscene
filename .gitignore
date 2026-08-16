@@ -13,6 +13,7 @@ __pycache__/
 .env.*
 !.env.example
 .enves
+.venv-packages-backup-*
 .DS_Store
 coverage/
 *.zip
