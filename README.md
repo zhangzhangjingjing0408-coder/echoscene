@@ -64,31 +64,31 @@ LiveKit 免费套餐包含每月 1000 分钟 Agent 会话，语音教练走 Live
 
 1. **打开插件**：在 YouTube 视频页，点击视频下方的 **Practice with EchoScene** 按钮（也可点扩展栏图标打开）。
 
-   ![打开插件](docs/images/01-open-extension.png)
+   ![打开插件](docs/images/01-open-extension.webp)
 
 2. **生成完整字幕**：插件自动拉取视频字幕，供你先阅读理解。
 
-   ![完整字幕](docs/images/02-transcript.png)
+   ![完整字幕](docs/images/02-transcript.webp)
 
 3. **深度理解**：字幕就绪后继续生成，完成后即可进入深度理解。
 
-   ![深度理解已完成](docs/images/03-deep-understanding-ready.png)
+   ![深度理解已完成](docs/images/03-deep-understanding-ready.webp)
 
 4. **深度理解概览**：呈现视频的论证结构与知识概览。
 
-   ![深度理解概览](docs/images/04-deep-understanding-overview.png)
+   ![深度理解概览](docs/images/04-deep-understanding-overview.webp)
 
 5. **口语练习题**：基于视频内容生成口语练习题。
 
-   ![口语练习题](docs/images/05-practice-exercises.png)
+   ![口语练习题](docs/images/05-practice-exercises.webp)
 
 6. **开始口语练习**：进入语音教练模式，与 AI 教练实时对话练习。
 
-   ![开始口语练习](docs/images/06-start-practice.png)
+   ![开始口语练习](docs/images/06-start-practice.webp)
 
 7. **练习记录**：练习记录仅缓存于本地浏览器，保护隐私。
 
-   ![练习记录](docs/images/07-local-records.png)
+   ![练习记录](docs/images/07-local-records.webp)
 
 ### 如何更新
 
