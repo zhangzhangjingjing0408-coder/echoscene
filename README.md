@@ -18,11 +18,14 @@ Cursor 等），它会帮你克隆、安装、构建插件并启动常驻服务�
 ```text
 请帮我在本机安装并启动 EchoScene（一个把 YouTube 视频变成实时口语练习的 Chrome 插件）。
 
-1. 克隆仓库到本地，进入项目目录。
+1. 克隆仓库 https://github.com/zhangzhangjingjing0408-coder/echoscene.git 到本地，进入项目目录。
 2. 运行 ./scripts/install.sh（脚本会自动安装 uv 和 pnpm、创建隔离的 Python 3.12 虚拟环境、
    安装后端依赖、构建 Chrome 插件，并在 macOS 上注册两个常驻服务）。
 3. 装完后确认 .env 已从 .env.example 生成（脚本会自动做，别覆盖我已有的 .env）。
 4. 用 curl http://127.0.0.1:8787/health 确认 API 已启动，返回 status: ok 即成功。
+5. 提示我打开项目根目录的 .env 填入三个 key（SUPADATA_API_KEY、DEEPSEEK_API_KEY、
+   LIVEKIT_URL/LIVEKIT_API_KEY/LIVEKIT_API_SECRET，详见 README「三个需要你填的 key」）。
+   我填完后，你再次运行 ./scripts/install.sh 让新配置生效。
 
 只负责安装和启动，不要改动任何功能代码。
 ```
