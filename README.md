@@ -55,6 +55,16 @@ LiveKit 免费套餐包含每月 1000 分钟 Agent 会话，语音教练走 Live
 3. 打开任意一个 YouTube 视频页，刷新一次，点击视频标题旁的 **Practice with EchoScene**。
 4. 首次使用会先准备字幕和深度内容，准备好后即可开始口语练习。
 
+### 如何更新
+
+功能有更新时（修复 bug 或加新功能），拉取最新代码并重新构建即可，**不会覆盖你已填好的 `.env`**：
+
+```bash
+git pull && ./scripts/install.sh
+```
+
+之后在 `chrome://extensions` 点一下「重新加载」让插件生效；后端服务（API 和语音教练）会由脚本自动重启，无需手动操作。
+
 ## What works in the skeleton
 
 - Chrome Side Panel that follows the current YouTube light or dark theme
